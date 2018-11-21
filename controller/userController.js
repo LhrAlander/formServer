@@ -1,6 +1,7 @@
-const User = require('../models/user');
+// const { parseModel, handleValidateErr } = require('../utils/dbHelpers')
+import { parseModel, handleValidateErr } from '../utils/dbHelpers'
+const User = require('../models/user')
 const { httpStatusCode, customRspCode } = require('../httpStatus/statusCode')
-const { parseModel, handleValidateErr } = require('../utils/dbHelpers')
 
 class UserController {
   getOne (req, res, next) {
@@ -12,7 +13,7 @@ class UserController {
   }
   createOne (req, res, next) {
     let user = parseModel(req, User)
-    let errors = handleValidateErr(user.validateSync());
+    let errors = handleValidateErr(user.validateSync())
     if (errors) {
       res.status(httpStatusCode.OK).json({
         code: customRspCode.PARAM_ERR,

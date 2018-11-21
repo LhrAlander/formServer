@@ -12,6 +12,6 @@ const statusCode = {
     PARAM_ERR: 1, // 请求参数有误
     SERVER_ERR: 2
   }
-}
+};
 
-module.exports = statusCode
+module.exports = statusCode;
