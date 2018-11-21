@@ -1,31 +1,47 @@
-// const { parseModel, handleValidateErr } = require('../utils/dbHelpers')
-import { parseModel, handleValidateErr } from '../utils/dbHelpers'
-const User = require('../models/user')
-const { httpStatusCode, customRspCode } = require('../httpStatus/statusCode')
+const User = require('../models/user');
+const CustomException = require('../utils/customException');
+const { parseModel, handleValidateErr } = require('../utils/dbHelpers');
+const { httpStatusCode, customRspCode } = require('../httpStatus/statusCode');
 
 class UserController {
   getOne (req, res, next) {
-    console.log(req.userId)
-    res.status(httpStatusCode.OK).json({
-      code: httpStatusCode.OK,
-      msg: 'success'
-    })
+    User.findOne({ phone: req.params.phone }).then(user => {
+      if (!user) throw new CustomException(customRspCode.SERVER_ERR, '未能找到该用户');
+      res.status(httpStatusCode.OK).json({
+        code: customRspCode.OK,
+        msg: 'success',
+        user
+      });
+    }).catch(error => {
+      if (error instanceof CustomException) {
+        return res.status(httpStatusCode.OK).json({
+          code: error.code,
+          msg: error.msg
+        });
+      }
+      return res.status(httpStatusCode.SERVE_ERR).end('服务器错误');
+    });
   }
   createOne (req, res, next) {
-    let user = parseModel(req, User)
-    let errors = handleValidateErr(user.validateSync())
+    let user = parseModel(req, User);
+    let errors = handleValidateErr(user.validateSync());
     if (errors) {
       res.status(httpStatusCode.OK).json({
         code: customRspCode.PARAM_ERR,
         errors
-      })
-      return
+      });
+      return;
     }
+    user.save().then(result => {
+      console.log('保存成功', result);
+    }).catch(err => {
+      console.log('保存失败', err);
+    });
     res.status(httpStatusCode.OK).json({
       code: customRspCode.OK,
       msg: 'success'
-    })
+    });
   }
 }
 
-module.exports = UserController
+module.exports = UserController;
